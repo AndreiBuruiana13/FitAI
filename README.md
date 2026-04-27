@@ -28,7 +28,7 @@
 
 ## 🎯 Jira — Product Backlog Scrum
 
-> **Link proiect Jira:** [https://fitai-scrum.atlassian.net/jira/software/projects/FITAI/boards](https://fitai-scrum.atlassian.net/jira/software/projects/FITAI/boards)
+> **Link proiect Jira:**  https://buru2003.atlassian.net/jira/software/projects/FITAI/boards/35/backlog
 
 Proiectul Jira **FITAI** este configurat ca **Scrum Board** cu:
 - **5 Epice:** Autentificare, Firmware ESP32, Backend API, ML Engine, Frontend PWA
