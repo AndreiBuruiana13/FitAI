@@ -1,204 +1,84 @@
-# FitAI — Sistem Inteligent IoT pentru Monitorizarea Activității Fizice
+# FitAI
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
-[![Platform: ESP32-C3](https://img.shields.io/badge/Platform-ESP32--C3-blue.svg)](https://www.espressif.com/en/products/socs/esp32-c3)
-[![Backend: FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com)
-[![ML: scikit-learn](https://img.shields.io/badge/ML-scikit--learn-orange.svg)](https://scikit-learn.org)
-[![Status: Proiect Licență](https://img.shields.io/badge/Status-Proiect%20Licen%C8%9B%C4%83-green.svg)]()
+An end-to-end wearable activity-recognition prototype developed by Andrei Stefan Buruiana for his Automation and Applied Informatics bachelor thesis at UTCB, completed in June 2026.
 
-> **Proiect de Licență** — Universitatea Tehnică de Construcții București  
-> Facultatea de Instalații · Automatică și Informatică Aplicată  
-> Sesiunea Științifică Mai 2025 · Andrei Buruiană
+FitAI connects an ESP32-C3 wearable to a FastAPI backend and browser dashboard. It classifies **resting, walking, running, and typing** from motion signals and provides an illustrative recovery-readiness score.
 
----
+## Features
 
-## 📋 Conținutul Repository-ului
+- Arduino C++ firmware: 100 Hz motion acquisition, one-second analysis windows, six extracted features, Wi-Fi telemetry and temporary offline buffering.
+- ESP32-C3, MPU6050 inertial sensor, MAX30102 optical sensor and SSD1306 OLED integration.
+- FastAPI REST API, JWT authentication, SQLAlchemy and SQLite persistence.
+- Random Forest inference with confidence checking and heuristic fallback.
+- Dashboard with live telemetry, activity predictions, session history and recovery trends.
 
-| Document | Descriere | Link |
-|----------|-----------|------|
-| `docs/SRS.pdf` | Software Requirements Specification v1.0 | [↗ docs/SRS.pdf](docs/SRS.pdf) |
-| `docs/SDS.pdf` | Software Design Specification v1.0 | [↗ docs/SDS.pdf](docs/SDS.pdf) |
-| `docs/Backlog.pdf` | Product Backlog Jira Export v1.0 | [↗ docs/Backlog.pdf](docs/Backlog.pdf) |
-| `docs/Prezentare.pptx` | Prezentare PowerPoint proiect licență | [↗ docs/Prezentare.pptx](docs/Prezentare.pptx) |
-| `backend/` | Server FastAPI + SQLite + ML Engine | [↗ backend/](backend/) |
-| `firmware/` | PlatformIO ESP32-C3 firmware | [↗ firmware/](firmware/) |
-| `frontend/` | Dashboard PWA (HTML/JS/Chart.js) | [↗ frontend/](frontend/) |
+## Recorded evaluation
 
----
+The included `app/ai/model_metadata.json` records **5,441 labelled sensor windows**:
 
-## 🎯 Jira — Product Backlog Scrum
+| Metric | Recorded value |
+| --- | ---: |
+| Holdout accuracy | 90.17% |
+| Holdout macro-F1 | 89.54% |
+| Five-fold cross-validation macro-F1 | 90.71% |
 
-> **Link proiect Jira:**  https://buru2003.atlassian.net/jira/software/projects/FITAI/boards/35/backlog
+Features: `accel_rms`, `accel_variance`, `accel_magnitude_mean`, `gyro_rms`, `mcr`, and `iqr`. Heart rate, GPS and speed are not classifier inputs. These are development results, not an independent replication. Nearby windows can be temporally correlated; evaluation separated by session or participant would provide stronger evidence of generalization.
 
-Proiectul Jira **FITAI** este configurat ca **Scrum Board** cu:
-- **5 Epice:** Autentificare, Firmware ESP32, Backend API, ML Engine, Frontend PWA
-- **30 User Stories** (FITAI-01 – FITAI-30)
-- **116 Story Points** distribuite în **4 Sprinturi** de 2 săptămâni
-- Corelat cu cerințele RF-XXX din SRS v1.0
+## Run locally
 
-| Epic | Stories | SP | Sprint |
-|------|---------|-----|--------|
-| Autentificare & Securitate | 5 | 19 | S1–S2 |
-| Firmware ESP32 & Senzori | 6 | 28 | S1–S2 |
-| Backend API & Bază de Date | 6 | 24 | S1–S3 |
-| ML Engine & Analiză | 5 | 24 | S2–S3 |
-| Frontend Dashboard & PWA | 8 | 21 | S3–S4 |
-| **TOTAL** | **30** | **116** | S1–S4 |
+Use Python 3.12 and a virtual environment:
 
----
-
-## 🏗️ Arhitectura Sistemului
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│              Stratul de Prezentare — Frontend PWA           │
-│                  HTML / JS / Chart.js / Service Worker      │
-├─────────────────────────────────────────────────────────────┤
-│           Stratul Aplicație — Backend REST API              │
-│                   Python FastAPI / JWT Auth                 │
-├─────────────────────────────────────────────────────────────┤
-│          Stratul Domeniu — ML Engine (MotorFitAI)           │
-│            Random Forest · Scor CNS · Trend HR              │
-├─────────────────────────────────────────────────────────────┤
-│           Stratul Date — SQLite + SQLAlchemy ORM            │
-├─────────────────────────────────────────────────────────────┤
-│         Stratul Hardware — Firmware ESP32-C3                │
-│    MAX30102 · MPU6050 · NEO-6M GPS · WiFi · PlatformIO      │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🔧 Stack Tehnologic
-
-### Hardware (Wearable IoT)
-- **ESP32-C3 Supermini** — microcontroller WiFi 2.4 GHz
-- **MAX30102** — senzor HR + SpO₂ (I²C)
-- **MPU6050** — accelerometru + giroscop 3-ax (I²C)
-- **NEO-6M** — modul GPS UART
-- **Li-Po 500mAh** — alimentare (~4.5h autonomie)
-
-### Backend
-- **Python 3.11** + **FastAPI** (ASGI/uvicorn)
-- **SQLite** + **SQLAlchemy ORM** + **Alembic** migrations
-- **JWT** (python-jose, HS256) + **bcrypt** passwords
-- **scikit-learn** RandomForestClassifier (PAMAP2 dataset)
-
-### Frontend
-- **Vanilla JS** (ES6 modules) + **Chart.js 4.x**
-- **PWA** — Service Worker + Web App Manifest
-- Fără framework SPA; bundle < 80 KB
-
----
-
-## 🚀 Setup Rapid
-
-### Backend
 ```bash
-cd backend
-python -m venv venv && source venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate
+# Windows PowerShell: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-cp .env.example .env          # configurează SECRET_KEY și DATABASE_URL
-alembic upgrade head          # aplică schema DB
-uvicorn app.main:app --reload --port 8000
-# Swagger UI: http://localhost:8000/docs
 ```
 
-### Firmware ESP32
+Copy `.env.example` to `.env`. Generate a unique signing key with this command and put its output in the local `SECRET_KEY` setting. Never commit `.env` or reuse an old key.
+
 ```bash
-cd firmware
-# Editează include/config.h: WIFI_SSID, WIFI_PASSWORD, SERVER_URL, AUTH_TOKEN
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+Open `http://127.0.0.1:8000` for the dashboard and `/docs` for the API. Register a local account. The database is created on startup and excluded from Git.
+
+The serialized model and raw personal measurements are not distributed in this source-only release. Until you train a local model, the application uses motion heuristics. `scripts/retrain_from_collected.py` supports retraining from a locally collected database.
+
+## Wearable
+
+Install PlatformIO. Edit the placeholder settings in `fitai_glove/platformio.ini` locally: Wi-Fi name/password, reachable backend LAN address, and a local account email/password. Loopback is a safe placeholder, not the address to use from a physical ESP32. Adjust the upload port for your computer. Keep local credentials out of commits.
+
+```bash
+cd fitai_glove
+pio run
 pio run --target upload
-pio device monitor            # serial monitor 115200 baud
+pio device monitor
 ```
 
-### Frontend
+## Tests
+
 ```bash
-# Servire statică simplă
-cd frontend
-python -m http.server 3000
-# Accesează http://localhost:3000
+python -m pytest -q
 ```
 
----
+## Layout
 
-## 📊 Funcționalități
+| Path | Purpose |
+| --- | --- |
+| `app/` | API, database, authentication, classification and readiness services |
+| `app/ai/` | Trained classifier and aggregate evaluation metadata |
+| `frontend/` | Dashboard and PWA assets |
+| `fitai_glove/` | PlatformIO firmware |
+| `scripts/` | Local model retraining |
+| `tests/` | Existing backend tests |
+| `alembic/` | Historical schema migration scaffolding |
 
-| Funcționalitate | Stare |
-|-----------------|-------|
-| Înregistrare/Login utilizator (JWT) | ✅ Done |
-| Colectare date HR + SpO₂ (MAX30102) | ✅ Done |
-| Colectare IMU accelerometru (MPU6050) | ✅ Done |
-| Tracking GPS (NEO-6M) | ✅ Done |
-| Transmisie WiFi REST POST (1 Hz) | ✅ Done |
-| Sesiuni antrenament start/stop | ✅ Done |
-| Clasificare activitate ML (Random Forest) | ✅ Done |
-| Scor recuperare CNS zilnic | ✅ Done |
-| Dashboard live (HR zones, pie chart) | ✅ Done |
-| Istoricul sesiunilor cu modal detalii | ✅ Done |
-| Calendar heatmap recuperare CNS | ✅ Done |
-| PWA instalabil + funcționare offline | ✅ Done |
+## Scope and privacy
 
----
+This is a student prototype for local demonstrations, not a production service or medical device. Optical measurements and recovery estimates are illustrative, not validated diagnostic measurements. GPS speed is a placeholder in the final firmware. Recovery scoring is separate from the classifier. External frontend libraries require internet access.
 
-## 📁 Structura Proiect
+The source excludes local databases, raw telemetry, device logs, backups, IDE files, local environment files and personal documents. Network/account settings are placeholders; test account values are synthetic. The backend requires a locally supplied signing key. Do not expose the development server directly to the internet.
 
-```
-fitai/
-├── backend/
-│   ├── app/
-│   │   ├── auth/          # JWT, bcrypt, rate limiting
-│   │   ├── sessions/      # CRUD sesiuni antrenament
-│   │   ├── telemetry/     # Ingestie date ESP32
-│   │   ├── ml/            # Random Forest classifier + CNS
-│   │   ├── recovery/      # Calcul scor recuperare
-│   │   └── main.py        # FastAPI app entry point
-│   ├── alembic/           # Migrații schema DB
-│   ├── tests/             # pytest unit + integration
-│   └── requirements.txt
-├── firmware/
-│   ├── src/
-│   │   ├── sensors.cpp    # MAX30102 + MPU6050
-│   │   ├── gps.cpp        # NEO-6M NMEA parser
-│   │   ├── wifi_client.cpp # HTTP POST + retry
-│   │   └── main.cpp       # FreeRTOS tasks
-│   ├── include/config.h   # WiFi, server URL, token
-│   └── platformio.ini
-├── frontend/
-│   ├── js/
-│   │   ├── api.js         # Fetch wrapper + JWT interceptor
-│   │   ├── dashboard.js   # Live charts
-│   │   ├── history.js     # Session list + modal
-│   │   ├── recovery.js    # CNS heatmap
-│   │   └── auth.js        # Login/register
-│   ├── sw.js              # Service Worker
-│   └── manifest.webmanifest
-├── docs/
-│   ├── SRS.pdf            # Software Requirements Specification
-│   ├── SDS.pdf            # Software Design Specification
-│   ├── Backlog.pdf        # Jira Product Backlog export
-│   └── Prezentare.pptx    # Prezentare licență
-└── README.md
-```
-
----
-
-## 📚 Documentație
-
-- **SRS v1.0** — Specificarea cerințelor funcționale (30+ cerințe RF-XXX)
-- **SDS v1.0** — Arhitectura, ERD, API spec, scenarii UC-01–05, pseudocod ML
-- **Jira** — Product Backlog: [fitai-scrum.atlassian.net](https://fitai-scrum.atlassian.net/jira/software/projects/FITAI/boards)
-
----
-
-## 👤 Autor
-
-**Andrei Buruiană**  
-UTCB — Automatică și Informatică Aplicată  
-GitHub: [@AndreiBuruiana13](https://github.com/AndreiBuruiana13)
-
----
-
-## 📄 Licență
-
-MIT License — vezi [LICENSE](LICENSE)
+Earlier commits contain planning documents from an earlier stage and should not be treated as evidence of the final implementation.
