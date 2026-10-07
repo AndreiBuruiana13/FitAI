@@ -1,0 +1,35 @@
+{
+  "name": "FitAI Pro",
+  "short_name": "FitAI",
+  "description": "Advanced IoT fitness telemetry platform with CNS recovery tracking",
+  "start_url": "/frontend/index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "categories": ["health", "fitness", "productivity"],
+  "lang": "en-US",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 720' fill='none'><rect width='1280' height='720' fill='%23f4f7f6'/><text x='640' y='360' font-family='Arial, sans-serif' font-size='48' text-anchor='middle' fill='%231e293b'>FitAI Pro Dashboard</text></svg>",
+      "sizes": "1280x720",
+      "type": "image/svg+xml",
+      "form_factor": "wide"
+    }
+  ]
+}

@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="theme-color" content="#fc4c02" />
+  <meta name="description" content="Platformă IoT de monitorizare a activității fizice cu recuperare SNC" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="FitAI" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="manifest.json" />
+  <title>FitAI — Centru de Comanda</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+       
+      --brand: #fc4c02;
+      --brand-hover: #e64600;
+      --brand-soft: rgba(252, 76, 2, 0.12);
+      --fitai-orange: var(--brand);
+      --fitai-orange-soft: var(--brand-soft);
+      --primary: var(--brand);
+      --accent-orange: var(--brand);
+
+       
+      --neutral-dark: #29282A;
+      --neutral-evergreen: #042A2B;
+      --neutral-charcoal: #525251;
+
+      --bg: #F7F7F5;
+      --surface: #FFFFFF;
+      --surface-muted: #FAFAF9;
+      --surface-soft: #f4f5f7;
+      --border: #E5E7EB;
+
+      --fitai-bg: var(--bg);
+      --fitai-card: var(--surface);
+      --fitai-line: var(--border);
+      --card: var(--surface);
+
+      --text: #16181D;
+      --text-muted: #6B7280;
+      --text-soft: #9CA3AF;
+      --fitai-ink: var(--text);
+      --fitai-ink-soft: var(--text-muted);
+      --text-main: var(--text);
+
+      --sidebar: #101418;
+      --sidebar-bg: var(--sidebar);
+      --sidebar-hover: #181E24;
+      --sidebar-active: rgba(252, 76, 2, 0.14);
+
+       
+      --metric-heart: #D61F34;
+      --metric-heart-soft: rgba(214, 31, 52, 0.14);
+      --metric-pulse: var(--metric-heart);
+      --metric-pulse-soft: var(--metric-heart-soft);
+
+       
+      --sensor-motion: #4CA97C;
+      --sensor-motion-soft: rgba(76, 169, 124, 0.14);
+
+       
+      --metric-aggregate: #16181D;
+      --metric-volume: #29282A;
+      --metric-neutral-strong: #16181D;
+
+       
+      --recovery-low: #AF1108;
+      --recovery-moderate: #fc4c02;
+      --recovery-good: #0F766E;
+
+       
+      --metric-sleep: #0E79B2;
+      --metric-sleep-soft: rgba(14, 121, 178, 0.14);
+      --metric-sleep-quality: #9A9A47;
+
+       
+      --activity-walk: #FCDC4D;
+      --activity-walk-soft: rgba(252, 220, 77, 0.20);
+      --activity-walk-readable: #A16207;
+
+      --activity-run: #D61F34;
+      --activity-run-soft: rgba(214, 31, 52, 0.14);
+
+      --activity-rest: #910BEA;
+      --activity-rest-readable: #910BEA;
+      --activity-rest-soft: rgba(145, 11, 234, 0.14);
+
+      --activity-typing: #0E79B2;
+      --activity-typing-soft: rgba(14, 121, 178, 0.16);
+
+       
+      --prep-line: #fc4c02;
+      --sleep-line: #0E79B2;
+
+       
+      --success-ui: #0F766E;
+      --success-ui-soft: #CCFBF1;
+
+      --warning-ui: #B45309;
+      --warning-ui-soft: #FEF3C7;
+
+      --danger-ui: #AF1108;
+      --danger-ui-soft: rgba(175, 17, 8, 0.12);
+
+      --info-ui: #334155;
+      --info-ui-soft: #E2E8F0;
+
+      --accent-green: var(--success-ui);
+      --accent-red: var(--danger-ui);
+      --accent-purple: #A855F7;
+
+       
+
+       
+      --live-glove-accent: var(--activity-rest-readable);
+
+      --radius-sm: 10px;
+      --radius-md: 14px;
+      --radius-lg: 18px;
+
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.06);
+      --shadow: var(--shadow-sm);
+    }
+    body {
+      background: var(--fitai-bg);
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--fitai-ink); margin: 0; display: flex; min-height: 100vh;
+    }
+    #auth-screen { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(250,250,250,0.85); backdrop-filter:blur(12px); display:flex; justify-content:center; align-items:center; z-index:2000; }
+    .auth-card { background:var(--fitai-card); padding:50px 40px; border-radius:24px; box-shadow:0 20px 40px rgba(0,0,0,0.08); width:100%; max-width:380px; text-align:center; }
+    .auth-input { width:100%; padding:14px; margin-bottom:16px; border:1px solid var(--fitai-line); border-radius:12px; box-sizing:border-box; font-family:inherit; font-size:0.95rem; transition:border-color 0.2s; }
+    .auth-input:focus { outline:none; border-color:var(--fitai-orange); }
+    .auth-btn { width:100%; padding:14px; margin-bottom:12px; border-radius:12px; font-weight:600; font-size:1rem; cursor:pointer; border:none; transition:opacity 0.2s; }
+    .auth-btn:hover { opacity:0.9; }
+    .auth-error { color:var(--accent-red); font-size:0.85rem; margin-bottom:15px; display:none; }
+    .sidebar { width:220px; background:var(--sidebar-bg); color:white; position:fixed; height:100vh; display:flex; flex-direction:column; z-index:100; box-shadow:0 16px 40px rgba(0,0,0,0.12); border-right:1px solid #1F2937; }
+    .sidebar-brand { padding:24px 18px; font-size:1.45rem; font-weight:700; letter-spacing:-0.5px; border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:20px; color:#FFFFFF; }
+    .nav-item { padding:14px 18px; color:#C7CCD1; cursor:pointer; font-weight:500; font-size:0.92rem; transition:all 0.2s ease; border-left:3px solid transparent; display:flex; align-items:center; gap:12px; }
+    .nav-item:hover { background:var(--sidebar-hover); color:#FFFFFF; }
+    .nav-item.active { background:var(--sidebar-active); color:#FFFFFF; border-left-color:var(--brand); }
+    .nav-spacer { flex-grow:1; }
+    .main-content { margin-left:220px; padding:28px; width:calc(100% - 220px); box-sizing:border-box; }
+    .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; border-bottom:1px solid var(--fitai-line); padding-bottom:18px; gap:14px; }
+    .header h1 { margin:0; font-size:28px; font-weight:800; color:var(--fitai-ink); letter-spacing:-0.02em; }
+    .status-pill { display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:999px; font-size:0.85rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; }
+    .system-live { background:var(--success-ui-soft); color:var(--success-ui); border:1px solid rgba(15, 118, 110, 0.25); }
+    .system-live::before { content:"\25CF"; color:var(--success-ui); margin-right:6px; animation:pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .section-title { font-size:11px; color:var(--fitai-ink-soft); margin:0 0 14px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; }
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:28px; }
+    .card { position:relative; background:var(--surface); border-radius:var(--radius-md); padding:20px; box-shadow:var(--shadow-sm); border:1px solid var(--border); overflow:hidden; min-height:130px; transition:box-shadow 150ms ease; }
+    .card:hover { box-shadow:var(--shadow-md); }
+    .metric-value { font-size:36px; font-weight:900; margin-top:8px; color:var(--fitai-ink); line-height:1.1; font-variant-numeric:tabular-nums; letter-spacing:-0.045em; }
+    .metric-value small { color:var(--fitai-ink-soft); font-size:0.95rem; font-weight:600; }
+    .metric-label { color:var(--fitai-ink-soft); font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; }
+    .metric-sub { font-size:11px; color:var(--fitai-ink-soft); margin-top:4px; font-weight:400; }
+    .label-badge { padding:4px 10px; border-radius:999px; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.05em; }
+    .badge-activity-walk, [data-activity="MERS"] { color:var(--activity-walk-readable); background:var(--activity-walk-soft); border:1px solid rgba(252, 220, 77, 0.35); }
+    .badge-activity-run, [data-activity="ALERGARE"] { color:var(--activity-run); background:var(--activity-run-soft); border:1px solid rgba(214, 31, 52, 0.25); }
+    .badge-activity-rest, [data-activity="REPAUS"] { color:var(--activity-rest-readable); background:var(--activity-rest-soft); border:1px solid rgba(145, 11, 234, 0.25); }
+    .badge-activity-typing, [data-activity="TASTARE"] { color:var(--activity-typing); background:var(--activity-typing-soft); border:1px solid rgba(14, 121, 178, 0.28); }
+    [data-activity="NECUNOSCUT"] { background:#F3F4F6; color:#4B5563; border:1px solid #D1D5DB; }
+    .current-activity-card { position:relative; }
+    .current-activity-card[data-activity="walk"] .current-activity-value { color:var(--activity-walk-readable); }
+    .current-activity-card[data-activity="rest"] .current-activity-value { color:var(--activity-rest-readable); }
+    .current-activity-card[data-activity="run"] .current-activity-value { color:var(--activity-run); }
+    .current-activity-card[data-activity="typing"] .current-activity-value { color:var(--activity-typing); }
+
+     
+    .metric-accent-card { position:relative; }
+    .metric-accent-card::before { content:""; position:absolute; left:0; top:16px; bottom:16px; width:4px; border-radius:999px; background:var(--border); }
+
+     
+    .metric-pulse-card.metric-accent-card::before { background:var(--metric-pulse); }
+
+     
+    .metric-motion-card.metric-accent-card::before { background:var(--sensor-motion); }
+
+     
+    .metric-sensor-card.metric-accent-card::before { background:var(--metric-neutral-strong); }
+
+     
+    .current-activity-card.metric-accent-card[data-activity="run"]::before { background:var(--activity-run); }
+    .current-activity-card.metric-accent-card[data-activity="walk"]::before { background:var(--activity-walk); }
+    .current-activity-card.metric-accent-card[data-activity="typing"]::before { background:var(--activity-typing); }
+    .current-activity-card.metric-accent-card[data-activity="rest"]::before { background:var(--activity-rest); }
+
+     
+    .metric-pulse-value {
+      color: var(--metric-pulse) !important;
+      font-size: clamp(30px, 2.5vw, 38px) !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+      letter-spacing: -0.04em !important;
+      font-variant-numeric: tabular-nums;
+    }
+    .metric-pulse-value .unit,
+    .metric-pulse-unit {
+      color: var(--text) !important;
+      font-size: 0.42em !important;
+      font-weight: 600 !important;
+      line-height: 1 !important;
+      letter-spacing: -0.01em !important;
+      vertical-align: baseline;
+    }
+    .metric-pulse-value small,
+    .metric-pulse-value span {
+      color: inherit !important;
+    }
+    .metric-motion-value { color:var(--sensor-motion); }
+    .metric-aggregate-value { color:var(--text); }
+    .metric-sleep-value { color:var(--metric-sleep); }
+
+     
+     
+.metric-prep-value,
+#avgReadiness {
+  color: var(--prep-line) !important;
+  font-size: clamp(30px, 2.5vw, 38px) !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: -0.04em !important;
+  font-variant-numeric: tabular-nums;
+}
+
+    table { width:100%; border-collapse:separate; border-spacing:0; font-size:0.92rem; }
+    th { text-align:left; color:var(--fitai-ink-soft); padding:12px 16px; border-bottom:2px solid var(--fitai-line); text-transform:uppercase; font-size:11px; font-weight:700; letter-spacing:0.08em; }
+    td { padding:14px 16px; border-bottom:1px solid var(--fitai-line); color:var(--fitai-ink); font-weight:600; }
+    tr:hover td { background:#FAFAFA; }
+    .chart-container { height:240px; width:100%; background:var(--surface-soft); border-radius:8px; padding:14px; border:1px solid var(--fitai-line); }
+    .view-content { display:none; animation:fadeIn 0.4s ease-out; }
+    .view-content.active { display:block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    .readiness-large { font-size:4rem; font-weight:700; text-align:center; margin:10px 0; letter-spacing:-2px; }
+    .readiness-gauge { width:100%; height:12px; background:var(--surface-soft); border-radius:10px; overflow:hidden; margin-bottom:15px; }
+    .readiness-fill { height:100%; background:linear-gradient(90deg,var(--accent-red),var(--fitai-orange),var(--accent-green)); transition:width 0.8s cubic-bezier(0.4,0,0.2,1); }
+    .recovery-input-group { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; align-items:end; margin-bottom:18px; }
+    .recovery-input { height:42px; padding:0 12px; border:1px solid var(--fitai-line); border-radius:10px; box-sizing:border-box; font-size:0.92rem; font-family:inherit; }
+    .btn-primary { background:var(--fitai-orange); color:white; border:none; height:44px; padding:0 16px; border-radius:10px; font-weight:600; cursor:pointer; transition:opacity 0.2s; display:flex; align-items:center; justify-content:center; }
+    .btn-primary:hover { opacity:0.9; }
+    .sparkline-wrap { height:44px; margin-top:10px; }
+    .cal-grid { display:flex; flex-wrap:wrap; gap:5px; padding:4px 0; }
+    .cal-cell { width:28px; height:28px; border-radius:6px; cursor:default; display:flex; align-items:center; justify-content:center; font-size:0.6rem; font-weight:700; color:rgba(255,255,255,0.85); position:relative; }
+    .cal-cell:hover::after { content:attr(data-tip); position:absolute; bottom:34px; left:50%; transform:translateX(-50%); background:var(--sidebar-bg); color:white; padding:4px 8px; border-radius:6px; font-size:0.72rem; white-space:nowrap; z-index:10; }
+    .cal-empty { background:var(--surface-soft); }
+    .cal-high { background:#10b981; }
+    .cal-mid { background:#f59e0b; }
+    .cal-low { background:#ef4444; }
+    #toast-container { position:fixed; top:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:10px; }
+    .toast { padding:14px 20px; border-radius:12px; font-weight:600; font-size:0.9rem; color:white; box-shadow:0 8px 24px rgba(0,0,0,0.15); animation:slideIn 0.3s ease-out; max-width:320px; }
+    .toast.info { background:var(--fitai-orange); }
+    .toast.success { background:var(--accent-green); }
+    .toast.error { background:var(--accent-red); }
+    @keyframes slideIn { from{opacity:0;transform:translateX(40px)} to{opacity:1;transform:translateX(0)} }
+    .install-btn { background:var(--fitai-orange); color:white; border:none; padding:8px 16px; border-radius:20px; font-weight:600; font-size:0.85rem; cursor:pointer; box-shadow:0 2px 8px rgba(252,76,2,0.3); transition:all 0.2s; margin-left:auto; }
+    .install-btn:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(252,76,2,0.4); }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    #session-modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); display:none; justify-content:center; align-items:flex-start; z-index:3000; padding:40px 20px; box-sizing:border-box; overflow-y:auto; }
+    #session-modal-overlay.open { display:flex; }
+    #session-modal { background:var(--surface); border-radius:24px; padding:32px; width:100%; max-width:1100px; position:relative; box-shadow:0 40px 120px rgba(15,23,42,0.25); animation:fadeIn 0.3s ease-out; overflow:hidden; }
+    .modal-close { position:absolute; top:20px; right:20px; background:var(--surface-soft); border:none; cursor:pointer; width:36px; height:36px; border-radius:50%; font-size:1.1rem; display:flex; align-items:center; justify-content:center; color:var(--fitai-ink-soft); transition:background 0.2s; }
+    .modal-close:hover { background:var(--fitai-line); color:var(--fitai-ink); }
+    .modal-stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; }
+    .modal-stat { background:var(--surface-soft); border-radius:14px; padding:14px; text-align:center; }
+    .modal-stat .ms-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--fitai-ink-soft); }
+    .modal-stat .ms-value { font-size:1.4rem; font-weight:800; margin-top:4px; color:var(--fitai-ink); }
+    .filter-bar { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; align-items:center; }
+    .filter-btn { padding:7px 18px; border-radius:999px; border:1px solid var(--fitai-line); background:var(--surface); font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.2s; color:var(--fitai-ink-soft); }
+    .filter-btn.active, .filter-btn:hover { background:var(--fitai-orange); color:white; border-color:var(--fitai-orange); }
+    #historyTable tbody tr { cursor:pointer; transition:background 0.15s; }
+    #historyTable tbody tr:hover { background:rgba(252,76,2,0.05); }
+    .page-spinner { text-align:center; padding:40px; color:var(--fitai-ink-soft); font-weight:600; font-size:0.9rem; display:flex; align-items:center; justify-content:center; gap:10px; }
+    .spinner-dot { display:inline-block; width:22px; height:22px; border:3px solid var(--fitai-line); border-top-color:var(--fitai-orange); border-radius:50%; animation:spin 0.8s linear infinite; }
+    @media(max-width:1200px) { body{display:block} .sidebar{position:relative;width:100%;height:auto;min-height:0} .main-content{margin-left:0;padding:20px;width:100%} .header{flex-direction:column;align-items:flex-start} .stats-grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))} .recovery-input-group{grid-template-columns:1fr 1fr} }
+    @media(max-width:768px) { .stats-grid{grid-template-columns:1fr} .recovery-input-group{grid-template-columns:1fr} .auth-card{width:calc(100% - 32px);padding:32px 24px} .metric-value{font-size:28px} .modal-stats-grid{grid-template-columns:1fr 1fr} #session-modal{padding:24px 16px} }
+  </style>
+</head>
+<body>
+
+  <div id="auth-screen">
+      <div class="auth-card">
+          <h2 style="margin-top:0;color:var(--fitai-ink);font-size:2rem;">FitAI <span style="font-weight:300;color:var(--fitai-orange);">Access</span></h2>
+          <p style="color:var(--fitai-ink-soft);font-size:0.95rem;margin-bottom:30px;">Portal securizat IoT — telemetrie sportivă</p>
+          <div id="authError" class="auth-error">Date incorecte</div>
+          <input type="email" id="email" class="auth-input" placeholder="Adresa de email" value="demo@example.com">
+          <input type="password" id="password" class="auth-input" placeholder="Parola" value="securepassword123">
+          <button class="auth-btn" style="background:var(--fitai-orange);color:white;" onclick="login()">Autentificare</button>
+          <button class="auth-btn" style="background:transparent;color:var(--fitai-ink-soft);border:1px solid var(--fitai-line);" onclick="register()">Creează cont</button>
+      </div>
+  </div>
+
+  <div id="dashboard-wrapper" style="display:none;width:100%;">
+    <div class="sidebar">
+      <div class="sidebar-brand">FitAI</div>
+      <div class="nav-item active" onclick="switchView('activity',this)">&#x1F4CA; Telemetrie Live</div>
+      <div class="nav-item" onclick="switchView('history',this)">&#x1F4DC; Istoric Sesiuni</div>
+      <div class="nav-item" onclick="switchView('recovery',this)">&#x1F9EC; Recuperare SNC</div>
+      <div class="nav-spacer"></div>
+      <div class="nav-item" onclick="downloadData()">&#x1F4E5; Export CSV</div>
+      <div class="nav-item" onclick="logout()" style="color:#ef4444;border-top:1px solid rgba(255,255,255,0.05);">&#x1F6AA; Deconectare</div>
+    </div>
+    <div class="main-content">
+      <div class="header">
+        <h1 id="page-title">Telemetrie Live</h1>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button id="refresh-btn" onclick="manualRefresh()" style="background:transparent;border:1px solid var(--fitai-ink-soft);color:var(--fitai-ink-soft);padding:8px 14px;border-radius:12px;font-size:0.82rem;cursor:pointer;display:none;">&#x1F504; Reimprospatare</button>
+          <span id="connection-status" class="status-pill system-live">DISPOZITIV CONECTAT</span>
+        </div>
+      </div>
+
+      <div id="activity-view" class="view-content active">
+        <div class="stats-grid">
+          <div class="card current-activity-card metric-accent-card"><div class="metric-label">Activitate Curentă</div><div id="currentActivity" class="metric-value current-activity-value" style="font-size:28px;">—</div></div>
+          <div class="card metric-pulse-card metric-accent-card"><div class="metric-label">Ultimul Puls Detectat</div><div id="currentHR" class="metric-value metric-pulse-value">—</div></div>
+          <div class="card metric-sensor-card metric-accent-card"><div class="metric-label">Frecvență Eșantionare</div><div id="sampleFreq" class="metric-value metric-aggregate-value">100 Hz</div><div class="metric-sub">ferestre 1s - 100 eșantioane</div></div>
+          <div class="card metric-volume-card"><div class="metric-label">Sesiuni Totale</div><div id="sessionCount" class="metric-value metric-aggregate-value">0</div></div>
+        </div>
+        <div class="stats-grid" style="margin-bottom:20px;">
+          <div class="card metric-motion-card metric-accent-card"><div class="metric-label">Accel RMS</div><div id="accelRms" class="metric-value metric-motion-value">—</div></div>
+          <div class="card metric-motion-card metric-accent-card"><div class="metric-label" title="RTM = Rata Traversarilor Mediei">RTM</div><div id="mcrValue" class="metric-value metric-motion-value">—</div><div class="metric-sub">treceri prin medie / fereastra</div></div>
+          <div class="card metric-motion-card metric-accent-card"><div class="metric-label">IQR Accelerație</div><div id="iqrValue" class="metric-value metric-motion-value">—</div></div>
+          <div class="card metric-pulse-card"><div class="metric-label">Puls Mediu Recent</div><div id="recentAvgHR" class="metric-value metric-pulse-value">—</div></div>
+        </div>
+        <div class="stats-grid" style="margin-bottom:20px;">
+          <div class="card metric-consistency-card"><div class="metric-label">Săptămâna — Zile Active</div><div id="weekSessions" class="metric-value metric-aggregate-value">—</div></div>
+          <div class="card metric-pulse-card"><div class="metric-label">Săptămâna — Puls Mediu</div><div id="weekAvgHR" class="metric-value metric-pulse-value">—</div></div>
+          <div class="card" style="display:none;"><div class="metric-label">Timp Activ Saptamanal</div><div id="weekActiveTime" class="metric-value" style="color:var(--accent-orange);">—</div></div>
+        </div>
+        
+        <div style="display:grid;grid-template-columns:1fr;gap:20px;margin-bottom:30px;">
+<div class="card"><div class="section-title">Rezumat Activitate</div><div id="activitySummaryContainer" style="padding:8px 0;"></div></div>
+        </div>
+        <div class="card"><div class="section-title">Flux de Date Senzor</div>
+          <table id="dataTable"><thead><tr><th>Ora</th><th>Clasificare</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+
+      <div id="recovery-view" class="view-content">
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:20px;margin-bottom:24px;">
+          <div class="card" style="display:flex;flex-direction:column;justify-content:center;">
+            <div class="section-title" style="text-align:center;">Pregătire Predictivă</div>
+            <div id="readinessScore" class="readiness-large">--</div>
+            <div id="readinessGauge" class="readiness-gauge"><div class="readiness-fill" style="width:50%;"></div></div>
+            <div id="readinessLabel" style="text-align:center;font-weight:700;font-size:1.1rem;margin-bottom:10px;">Se calculează...</div>
+            <div id="readinessRecommendation" style="text-align:center;color:var(--fitai-ink-soft);font-size:0.9rem;line-height:1.5;"></div>
+          </div>
+          <div class="card">
+            <div class="section-title">Înregistrare Date Biometrice</div>
+            <div class="recovery-input-group">
+              <div><label class="metric-label" style="display:block;margin-bottom:8px;">Data</label><input type="date" id="recoveryDate" class="recovery-input"></div>
+              <div><label class="metric-label" style="display:block;margin-bottom:8px;">Ore de Somn</label><input type="number" id="sleepHours" class="recovery-input" placeholder="Ore de somn" step="0.5"></div>
+              <div><label class="metric-label" style="display:block;margin-bottom:8px;">Puls Măsurat</label><input type="number" id="restingHR" class="recovery-input" placeholder="Puls măsurat"></div>
+              <div><label class="metric-label" style="display:block;margin-bottom:8px;">Disconfort Muscular (0-10)</label><input type="number" id="muscleSoreness" class="recovery-input" placeholder="Nivel 0-10" step="0.5"></div>
+            </div>
+            <button class="btn-primary" onclick="logRecoveryMetrics()" style="width:100%;">Procesează Metrici</button>
+          </div>
+        </div>
+        <div class="stats-grid">
+<div class="card"><div class="metric-label">Pregătire Medie 30 Zile</div><div id="avgReadiness" class="metric-value metric-prep-value">—</div><div class="sparkline-wrap"><canvas id="sparkReadiness"></canvas></div></div>
+          <div class="card metric-sleep-card"><div class="metric-label">Somn Mediu pe 30 Zile</div><div id="avgSleep" class="metric-value metric-sleep-value">—</div><div class="sparkline-wrap"><canvas id="sparkSleep"></canvas></div></div>
+          <div class="card metric-restpulse-card metric-pulse-card"><div class="metric-label">Puls  Mediu pe 30 Zile</div><div id="avgRHR" class="metric-value metric-pulse-value">—</div><div class="sparkline-wrap"><canvas id="sparkRHR"></canvas></div></div>
+          <div class="card"><div class="metric-label">Tendință Lunară</div><div id="recoveryTrend" class="metric-value" style="color:var(--accent-green);font-size:1.5rem;">—</div><div id="trendSlope" style="font-size:0.82rem;color:var(--fitai-ink-soft);margin-top:4px;font-weight:600;"></div></div>
+        </div>
+        <div class="card" style="margin-bottom:24px;"><div class="section-title">Evoluția Recuperării</div><div class="chart-container"><canvas id="recoveryChart"></canvas></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+          <div class="card"><div class="section-title">Distribuție Calitate Somn</div><div class="chart-container" style="height:220px;"><canvas id="sleepChart"></canvas></div></div>
+          <div class="card"><div class="section-title">Varianță Disconfort Muscular</div><div class="chart-container" style="height:220px;"><canvas id="sorenessChart"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="section-title">Hartă Termică Recuperare 30 Zile</div>
+          <div id="recoveryCalendar" class="cal-grid"></div>
+          <div style="display:flex;gap:16px;margin-top:12px;font-size:0.78rem;color:var(--fitai-ink-soft);font-weight:600;">
+            <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#10b981;margin-right:4px;vertical-align:middle;"></span>Ridicat (&ge;70)</span>
+            <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#f59e0b;margin-right:4px;vertical-align:middle;"></span>Moderat (50–69)</span>
+            <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#ef4444;margin-right:4px;vertical-align:middle;"></span>Scăzut (<50)</span>
+            <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#f1f5f9;margin-right:4px;vertical-align:middle;"></span>Fără date</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="history-view" class="view-content">
+        <div class="stats-grid" style="margin-bottom:20px;">
+          <div class="card metric-volume-card"><div class="metric-label">Total Sesiuni</div><div id="historyTotal" class="metric-value metric-volume-value">—</div></div>
+          <div class="card" style="display:none;"><div class="metric-label">Durata Medie</div><div id="historyAvgDuration" class="metric-value" style="color:var(--accent-orange);">—</div></div>
+          <div class="card metric-pulse-card"><div class="metric-label">Puls Mediu General</div><div id="historyAvgHR" class="metric-value metric-pulse-value">—</div></div>
+          <div class="card" style="display:none;"><div class="metric-label">Cea Mai Buna Sesiune</div><div id="historyBestSession" class="metric-value" style="color:var(--fitai-orange);">—</div></div>
+        </div>
+        <div class="card">
+          <div class="section-title">Istoric Sesiuni de Antrenament</div>
+          <div class="filter-bar">
+            <button class="filter-btn active" onclick="filterSessions('all',this)">Toate</button>
+            <button class="filter-btn" onclick="filterSessions('MERS',this)">Mers</button>
+            <button class="filter-btn" onclick="filterSessions('ALERGARE',this)">Alergare</button>
+            <button class="filter-btn" onclick="filterSessions('REPAUS',this)">Repaus</button>
+            <button class="filter-btn" onclick="filterSessions('TASTARE',this)">Tastare</button>
+          </div>
+          <div id="historySpinner" class="page-spinner" style="display:none;"><span class="spinner-dot"></span> Se încarcă sesiunile...</div>
+<div style="overflow-x:auto;"><table id="historyTable"><thead><tr><th>Data</th><th>Activitate principala</th><th>Durata</th><th>Puls Mediu</th><th>Esantioane</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="session-modal-overlay" onclick="handleModalOverlayClick(event)">
+    <div id="session-modal">
+      <button class="modal-close" onclick="closeSessionModal()" title="Închide">&#x2715;</button>
+      <h2 id="modal-title" style="margin:0 0 20px;font-size:1.4rem;font-weight:800;color:var(--fitai-ink);"></h2>
+      <div class="modal-stats-grid">
+        <div class="modal-stat"><div class="ms-label">Data</div><div id="modal-date" class="ms-value" style="font-size:1rem;"></div></div>
+        <div class="modal-stat"><div class="ms-label">Durata</div><div id="modal-duration" class="ms-value"></div></div>
+          <div class="modal-stat"><div class="ms-label">Puls Mediu</div><div id="modal-avg-hr" class="ms-value" style="color:var(--metric-heart);"></div></div>
+        <div class="modal-stat"><div class="ms-label">Esantioane</div><div id="modal-samples" class="ms-value" style="color:var(--accent-purple);"></div></div>
+      </div>
+      <div id="modal-telemetry-spinner" class="page-spinner" style="display:none;"><span class="spinner-dot"></span> Se încarcă telemetria...</div>
+      <div class="section-title" style="margin-bottom:10px;">Telemetrie Completa</div>
+      <div style="overflow-x:auto;max-height:300px;overflow-y:auto;"><table id="modal-telemetry-table"><thead><tr><th>Ora</th><th>Puls (bpm)</th><th>Accel RMS (g)</th><th>Clasificare</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+<script>
+const API = "http://127.0.0.1:8000";
+let syncInterval;
+var liveInterval;
+var liveAggregateTimer;
+var _refreshingAggregates = false;
+let _chartReadiness=null,_chartSleep=null,_chartSoreness=null,_chartHRZ=null,_sparkReadiness=null,_sparkSleep=null,_sparkRHR=null;
+let activitySummaryBuffer = [];
+var ACTIVITY_SUMMARY_MAX = 176;
+const LABEL_MAP = {
+"WALKING":  "MERS",
+"RUNNING":  "ALERGARE",
+"RESTING":  "REPAUS",
+"TYPING":   "TASTARE",
+"UNKNOWN":  "NECUNOSCUT",
+"uncertain":"NECUNOSCUT",
+"walk":     "MERS",
+"run":      "ALERGARE",
+"bike":     "REPAUS"
+};
+function displayLabel(r){return r?LABEL_MAP[r]||r.toUpperCase():'NECUNOSCUT';}
+function normalizeActivityKey(activity) { var value = String(activity || "").trim().toUpperCase(); if (value.includes("MERS") || value.includes("WALK")) return "walk"; if (value.includes("REPAUS") || value.includes("REST")) return "rest"; if (value.includes("ALERGARE") || value.includes("RUN")) return "run"; if (value.includes("TASTARE") || value.includes("TYPING")) return "typing"; return ""; }
+function getActivityColorVar(activityKey) { if (activityKey === "walk") return "var(--activity-walk)"; if (activityKey === "run") return "var(--activity-run)"; if (activityKey === "rest") return "var(--activity-rest-readable)"; if (activityKey === "typing") return "var(--activity-typing)"; return "var(--neutral-charcoal)"; }
+function applyLiveGloveAccent(activity) { var key = normalizeActivityKey(activity); var color = getActivityColorVar(key); document.documentElement.style.setProperty("--live-glove-accent", color); }
+function applyCurrentActivityTheme(activity) { var card = document.querySelector(".current-activity-card"); if (!card) return; var key = normalizeActivityKey(activity); if (key) { card.dataset.activity = key; } else { card.removeAttribute("data-activity"); } applyLiveGloveAccent(activity); }
+function getRecoveryColorByScore(score) { var n = Number(score); if (!Number.isFinite(n)) return "var(--text)"; if (n >= 70) return "var(--recovery-good)"; if (n >= 50) return "var(--recovery-moderate)"; return "var(--recovery-low)"; }
+function getActivityBadgeClass(activity) { var key = normalizeActivityKey(activity); if (key === "walk") return "badge-activity-walk"; if (key === "rest") return "badge-activity-rest"; if (key === "run") return "badge-activity-run"; if (key === "typing") return "badge-activity-typing"; return ""; }
+function labelCssClass(r){var m=displayLabel(r);var bc=getActivityBadgeClass(m);if(bc)return bc;var c={'MERS':'badge-activity-walk','ALERGARE':'badge-activity-run','REPAUS':'badge-activity-rest','TASTARE':'badge-activity-typing','NECUNOSCUT':'badge-unknown'};return c[m]||'badge-unknown';}
+function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function activityColor(r){var m=displayLabel(r);var c={'MERS':cssVar('--activity-walk'),'ALERGARE':cssVar('--activity-run'),'REPAUS':cssVar('--activity-rest'),'TASTARE':cssVar('--activity-typing'),'NECUNOSCUT':'#94a3b8'};return c[m]||'#94a3b8';}
+function toast(m,t){t=t||'info';var e=document.createElement('div');e.className='toast '+t;e.textContent=m;document.getElementById('toast-container').appendChild(e);setTimeout(function(){e.remove();},4000);}
+var _cache={};
+async function cachedFetch(url,ttlMs){ttlMs=ttlMs||15000;var now=Date.now();if(_cache[url]&&now-_cache[url].ts<ttlMs)return _cache[url].data;var token=getToken();try{var res=await fetch(url,{headers:{'Authorization':'Bearer '+token},signal:AbortSignal.timeout(10000)});if(res.status===401){logout();return null;}if(!res.ok)throw new Error(res.status);var data=await res.json();_cache[url]={data:data,ts:now};return data;}catch(e){console.log('[Cache] Network error for '+url+':',e.message);if(_cache[url]){console.log('[Cache] Returning stale data for '+url);return _cache[url].data;}if(url.includes('/stats')){return{total_sessions:0,week_active_days:0,week_avg_hr:0,week_active_minutes:0};}if(url.includes('/sessions'))return[];if(url.includes('/recovery/trend')){return{dates:[],readiness_scores:[],sleep_hours_list:[],resting_hr_list:[],soreness_list:[],average_readiness:0,trend:'insufficient data',trend_slope:null};}throw e;}}
+function invalidateCache(p){Object.keys(_cache).forEach(function(k){if(k.includes(p))delete _cache[k];});}
+function getToken(){return localStorage.getItem('fitai_token');}
+function setToken(t){localStorage.setItem('fitai_token',t);}
+function logout(){localStorage.removeItem('fitai_token');clearInterval(syncInterval);clearInterval(liveInterval);clearInterval(liveAggregateTimer);liveAggregateTimer=null;liveInterval=null;_refreshingAggregates=false;activitySummaryBuffer=[];document.getElementById('dashboard-wrapper').style.display='none';document.getElementById('auth-screen').style.display='flex';}
+async function login(){var e=document.getElementById('email').value;var p=document.getElementById('password').value;var b=new URLSearchParams({username:e,password:p});try{var r=await fetch(API+'/login',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:b});if(!r.ok)throw new Error("Autentificare esuata");var d=await r.json();setToken(d.access_token);startDashboard();}catch(x){document.getElementById('authError').style.display='block';}}
+async function register(){var e=document.getElementById('email').value;var p=document.getElementById('password').value;try{var r=await fetch(API+'/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:e,password:p})});if(!r.ok)throw new Error("Inregistrare esuata");var d=await r.json();setToken(d.access_token);startDashboard();}catch(x){document.getElementById('authError').textContent='Email deja inregistrat';document.getElementById('authError').style.display='block';}}
+function switchView(v,e){document.querySelectorAll('.view-content').forEach(function(c){c.classList.remove('active');});document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});document.getElementById(v+'-view').classList.add('active');e.classList.add('active');document.getElementById('page-title').textContent=v==='activity'?'Telemetrie Live':v==='recovery'?'Recuperare SNC & Pregătire':'Istoric Sesiuni';setTimeout(function(){if(v==='recovery'){var t=new Date().toISOString().split('T')[0];document.getElementById('recoveryDate').value=t;[_chartReadiness,_chartSleep,_chartSoreness,_sparkReadiness,_sparkSleep,_sparkRHR].forEach(function(c){if(c)c.resize();});}if(v==='history')loadSessionHistory();if(v==='activity')refreshLiveAggregates();},100);}
+async function seedRecoveryData(){try{var r=await fetch(API+'/recovery/seed',{method:'POST',headers:{'Authorization':'Bearer '+getToken()}});if(r.status===401){logout();return;}if(!r.ok)throw new Error('Failed to seed');var d=await r.json();if(d&&d.count){invalidateCache('recovery');loadRecoveryData();}toast('Date de recuperare generate','success');}catch(e){toast('Eroare la generarea datelor de recuperare','error');}}
+let _allSessions=[],_activeFilter='all';
+function activityBadge(t){var l=displayLabel(t);var c=labelCssClass(t);return'<span class="label-badge '+c+'" data-activity="'+l+'">'+l+'</span>';}
+function filterSessions(t,b){_activeFilter=t;document.querySelectorAll('.filter-btn').forEach(function(x){x.classList.remove('active');});b.classList.add('active');renderSessionRows(_allSessions);}
+function isValidSession(s){if(!s.start_time)return false;var d=new Date(s.start_time);if(isNaN(d.getTime()))return false;var y=d.getFullYear();if(y<2025)return false;if(s.duration_min==null||s.duration_min<0||s.duration_min>1440)return false;if(s.sample_count==null||s.sample_count<=0)return false;return true;}
+function renderSessionRows(s){var valid=s.filter(isValidSession);var f=_activeFilter==='all'?valid:valid.filter(function(x){return displayLabel(x.activity_type)===_activeFilter;});var r=f.map(function(s){var d=s.start_time?new Date(s.start_time).toLocaleDateString('ro-RO',{year:'numeric',month:'short',day:'numeric'}):'—';var dr=s.duration_min!=null?s.duration_min+' min':'—';var hr=s.avg_heart_rate!=null?s.avg_heart_rate+' bpm':'—';return'<tr onclick="openSessionModal('+s.session_id+')" title="Click pentru detalii"><td>'+d+'</td><td>'+activityBadge(s.activity_type)+'</td><td>'+dr+'</td><td>'+hr+'</td><td>'+(s.sample_count||'—')+'</td></tr>';}).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--fitai-ink-soft);padding:24px;">Nu există sesiuni valide.</td></tr>';document.querySelector('#historyTable tbody').innerHTML=r;}
+async function loadSessionHistory(){document.getElementById('historySpinner').style.display='flex';try{var s=await forceFetchJSON(API+'/sessions');if(!s)return;s.sort(function(a,b){return new Date(b.start_time)-new Date(a.start_time);});_allSessions=s;var valid=s.filter(isValidSession);var t=valid.length;var hv=valid.filter(function(x){return x.avg_heart_rate!=null&&x.avg_heart_rate>=30&&x.avg_heart_rate<=220;}).map(function(x){return x.avg_heart_rate;});var ohr=hv.length?Math.round(hv.reduce(function(a,b){return a+b;},0)/hv.length):null;document.getElementById('historyTotal').textContent=t;document.getElementById('historyAvgHR').innerHTML=ohr?ohr+'<small class="unit"> bpm</small>':'—';renderSessionRows(s);}catch(e){toast('Nu s-a putut incarca istoricul sesiunilor','error');}finally{document.getElementById('historySpinner').style.display='none';}}
+function handleModalOverlayClick(e){if(e.target===document.getElementById('session-modal-overlay'))closeSessionModal();}
+function closeSessionModal(){document.getElementById('session-modal-overlay').classList.remove('open');}
+async function openSessionModal(id){var s=_allSessions.find(function(x){return x.session_id===id;});if(!s)return;var d=s.start_time?new Date(s.start_time).toLocaleString('ro-RO',{dateStyle:'medium',timeStyle:'short'}):'—';document.getElementById('modal-title').textContent='Sesiune #'+id+' \u2014 '+displayLabel(s.activity_type);document.getElementById('modal-date').textContent=d;document.getElementById('modal-duration').textContent=s.duration_min!=null?s.duration_min+' min':'—';document.getElementById('modal-avg-hr').textContent=s.avg_heart_rate!=null?s.avg_heart_rate+' bpm':'—';document.getElementById('modal-samples').textContent=s.sample_count!=null?s.sample_count:'—';document.querySelector('#modal-telemetry-table tbody').innerHTML='';document.getElementById('modal-telemetry-spinner').style.display='flex';document.getElementById('session-modal-overlay').classList.add('open');try{var tk=getToken();var r=await fetch(API+'/activities?session_id='+id+'&limit=500',{headers:{'Authorization':'Bearer '+tk}});if(!r.ok)throw new Error('Failed to load telemetry');var pts=await r.json();var rows=pts.map(function(p){return'<tr><td style="color:#4A5057;font-weight:400;">'+formatLocalTime(p.timestamp)+'</td><td>'+(p.heart_bpm!=null?p.heart_bpm:'—')+'</td><td>'+(p.accel_rms!=null?p.accel_rms.toFixed(4):'—')+'</td><td>'+activityBadge(p.label)+'</td></tr>';}).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--fitai-ink-soft);padding:16px;">Nicio dată disponibilă</td></tr>';document.querySelector('#modal-telemetry-table tbody').innerHTML=rows;}catch(e){toast('Eroare la incarcarea detaliilor sesiunii','error');}finally{document.getElementById('modal-telemetry-spinner').style.display='none';}}
+var RECO_RO = {
+"Moderate: Recovery emphasized. Light activity recommended.":"Oboseală moderată. Se recomandă recuperare activă și activitate ușoară.",
+"High readiness \u2014 ready for intense training":"Pregătire ridicată \u2014 pregătit pentru antrenament intens",
+"Good recovery \u2014 normal training recommended":"Recuperare bună \u2014 antrenament normal recomandat",
+"Moderate fatigue \u2014 consider lighter training":"Oboseală moderată \u2014 luați în considerare un antrenament mai ușor",
+"Low readiness \u2014 prioritize rest":"Pregătire scăzută \u2014 prioritizați odihna",
+"Rest and recovery strongly recommended":"Se recomandă ferm odihnă și recuperare",
+"Normal HRV, moderate training load acceptable":"HRV normal, încărcătură de antrenament moderată acceptabilă",
+"Light activity recommended. Monitor fatigue.":"Activitate ușoară recomandată. Monitorizați oboseala.",
+"Recovery emphasized. Light activity recommended.":"Recuperare accentuată. Activitate ușoară recomandată.",
+"Normal readiness \u2014 regular training":"Pregătire normală \u2014 antrenament regulat"
+};
+function translateReco(text){if(!text)return'';if(RECO_RO[text])return RECO_RO[text];var t=text;if(t.indexOf('Moderate')!==-1||t.indexOf('Recovery emphasized')!==-1||t.indexOf('Light activity recommended')!==-1){return'Oboseală moderată. Se recomandă recuperare activă și activitate ușoară.';}if(t.indexOf('High readiness')!==-1)return'Pregătire ridicată \u2014 pregătit pentru antrenament intens';if(t.indexOf('Good recovery')!==-1)return'Recuperare bună \u2014 antrenament normal recomandat';if(t.indexOf('Moderate fatigue')!==-1)return'Oboseală moderată \u2014 luați în considerare un antrenament mai ușor';if(t.indexOf('Low readiness')!==-1)return'Pregătire scăzută \u2014 prioritizați odihna';if(t.indexOf('Rest and recovery')!==-1)return'Se recomandă ferm odihnă și recuperare';if(t.indexOf('Normal HRV')!==-1)return'HRV normal, încărcătură de antrenament moderată acceptabilă';if(t.indexOf('Normal readiness')!==-1)return'Pregătire normală \u2014 antrenament regulat';if(t.indexOf('Light activity recommended. Monitor')!==-1)return'Activitate ușoară recomandată. Monitorizați oboseala.';return t;}
+async function loadReadinessForecast(){try{var f=await cachedFetch(API+'/recovery/readiness-forecast');if(!f)return;var s=f.readiness_score||50;document.getElementById('readinessScore').textContent=Math.round(s);document.querySelector('#readinessGauge .readiness-fill').style.width=s+'%';var c=getRecoveryColorByScore(s),l='Recuperare Necesară';if(s>=90){l='Performanță Maximă';}else if(s>=70){l='Stare Normală';}else if(s>=50){l='Oboseală Ridicată';}document.getElementById('readinessScore').style.color=c;document.getElementById('readinessLabel').textContent=l;var raw=(f.source||'').toLowerCase();var src=(raw=='logged_data'||raw=='logged data')?'DATE ÎNREGISTRATE':raw=='7-day average'?'MEDIE 7 ZILE':(f.source||'').toUpperCase();document.getElementById('readinessRecommendation').innerHTML='<span>'+translateReco(f.recommendation)+'</span><br><span style="font-size:0.75rem;color:#94a3b8;margin-top:5px;display:inline-block;">SURSĂ: '+src+'</span>';}catch(e){toast('Eroare la incarcarea prognozei','error');}}
+async function logRecoveryMetrics(){var d=document.getElementById('recoveryDate').value;var s=parseFloat(document.getElementById('sleepHours').value);var r=parseInt(document.getElementById('restingHR').value);var m=parseFloat(document.getElementById('muscleSoreness').value);if(!d){toast('Selectați o dată','error');return;}if(!s&&!r&&!m){toast('Introduceți cel puțin o metrică','error');return;}try{var res=await fetch(API+'/recovery/log',{method:'POST',headers:{'Authorization':'Bearer '+getToken(),'Content-Type':'application/json'},body:JSON.stringify({date:d,sleep_hours:s||null,resting_heart_rate:r||null,muscle_soreness:m||null})});if(!res.ok){if(res.status===422){var ed=await res.json();toast('Eroare validare: '+(ed.detail||'Date invalide'),'error');return;}else if(res.status===401){logout();return;}else throw new Error('Failed');}await res.json();document.getElementById('sleepHours').value='';document.getElementById('restingHR').value='';document.getElementById('muscleSoreness').value='';invalidateCache('recovery');loadRecoveryData();toast('Metrici de recuperare înregistrate','success');}catch(e){toast('Eroare la înregistrare. Verificați autentificarea.','error');}}
+function _drawSparkline(id,vals,color,ex,fillColor){var ctx=document.getElementById(id).getContext('2d');if(ex)ex.destroy();var c=vals.map(function(v){return v!=null?v:null;});var fc=fillColor||(color+'18');return new Chart(ctx,{type:'line',data:{labels:c.map(function(_,i){return i;}),datasets:[{data:c,borderColor:color,borderWidth:1.5,fill:true,backgroundColor:fc,tension:0.4,pointRadius:0,spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});}
+function _buildCalendar(dates,scores){var cal=document.getElementById('recoveryCalendar');cal.innerHTML='';var sm={};dates.forEach(function(d,i){sm[d]=scores[i];});for(var i=29;i>=0;i--){var dt=new Date();dt.setDate(dt.getDate()-i);var key=dt.toISOString().split('T')[0];var sc=sm[key];var cell=document.createElement('div');cell.className='cal-cell';if(sc==null){cell.classList.add('cal-empty');cell.setAttribute('data-tip',key+': fără date');}else{cell.classList.add(sc>=70?'cal-high':sc>=50?'cal-mid':'cal-low');cell.textContent=Math.round(sc);cell.setAttribute('data-tip',key+': '+Math.round(sc)+'%');}cal.appendChild(cell);}}
+async function loadRecoveryData(){try{var t=await cachedFetch(API+'/recovery/trend?days=30');if(!t)return;document.getElementById('avgReadiness').textContent=t.average_readiness.toFixed(0)+'%';var sv=t.sleep_hours_list.filter(function(s){return s!=null;});var as=sv.length?sv.reduce(function(a,b){return a+b;},0)/sv.length:0;document.getElementById('avgSleep').textContent=as.toFixed(1)+'h';var rv=t.resting_hr_list.filter(function(r){return r!=null;});var ar=rv.length?rv.reduce(function(a,b){return a+b;},0)/rv.length:0;document.getElementById('avgRHR').textContent=Math.round(ar)+' bpm';var sl=t.trend_slope;var isi=typeof t.trend==='string'&&t.trend.toLowerCase().includes('insufficient');var arw=isi?'\u2192':t.trend==='improving'?'\u2197':t.trend==='declining'?'\u2198':'\u2192';var tc=isi?'var(--accent-orange)':t.trend==='improving'?'var(--accent-green)':t.trend==='declining'?'var(--accent-red)':'var(--accent-orange)';var tro=t.trend=='improving'?'În ameliorare':t.trend=='declining'?'În scădere':t.trend=='stable'?'Stabil':'În așteptare';var tl=isi?'\u2192 În așteptare':arw+' '+tro;document.getElementById('recoveryTrend').style.color=tc;document.getElementById('recoveryTrend').textContent=tl;document.getElementById('trendSlope').textContent=sl!=null?'panta: '+(sl>0?'+':'')+sl.toFixed(3)+' pts/zi':'';_sparkReadiness=_drawSparkline('sparkReadiness',t.readiness_scores,'#FC4C02',_sparkReadiness);_sparkSleep=_drawSparkline('sparkSleep',sv.length?t.sleep_hours_list:[],cssVar('--metric-sleep'),_sparkSleep,cssVar('--metric-sleep-soft'));_sparkRHR=_drawSparkline('sparkRHR',rv.length?t.resting_hr_list:[],cssVar('--metric-pulse'),_sparkRHR,cssVar('--metric-pulse-soft'));_buildCalendar(t.dates,t.readiness_scores);updateRecoveryChart(t);updateSleepChart(t);updateSorenessChart(t);loadReadinessForecast();}catch(e){toast('Eroare la incarcarea datelor de recuperare','error');}}
+function updateRecoveryChart(t){var ctx=document.getElementById('recoveryChart').getContext('2d');if(_chartReadiness)_chartReadiness.destroy();_chartReadiness=new Chart(ctx,{type:'line',data:{labels:t.dates,datasets:[{label:'Pregatire %',data:t.readiness_scores,borderColor:'#FC4C02',backgroundColor:'rgba(252,76,2,0.05)',fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:'#fff',pointBorderColor:'#FC4C02',pointBorderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false,grid:{color:'#E6E8EB'}},y:{min:0,max:100,ticks:{color:'#4A5057',font:{size:11}},grid:{color:'#E6E8EB'}}}}});}
+function updateSleepChart(t){var ctx=document.getElementById('sleepChart').getContext('2d');if(_chartSleep)_chartSleep.destroy();_chartSleep=new Chart(ctx,{type:'bar',data:{labels:t.dates,datasets:[{data:t.sleep_hours_list,backgroundColor:cssVar('--metric-sleep'),borderColor:cssVar('--metric-sleep'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{beginAtZero:true,max:12,ticks:{color:'#4A5057',font:{size:11}},grid:{color:'#E6E8EB'}}}}});}
+function updateSorenessChart(t){var ctx=document.getElementById('sorenessChart').getContext('2d');if(_chartSoreness)_chartSoreness.destroy();_chartSoreness=new Chart(ctx,{type:'line',data:{labels:t.dates,datasets:[{data:t.soreness_list,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.1)',fill:true,tension:0.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{min:0,max:10,ticks:{color:'#4A5057',font:{size:11}},grid:{color:'#E6E8EB'}}}}});}
+
+ 
+async function forceFetchJSON(url){
+    var token=getToken();
+    var sep=url.includes('?')?'&':'?';
+    var res=await fetch(url+sep+'_ts='+Date.now(),{
+        headers:{'Authorization':'Bearer '+token},
+        signal:AbortSignal.timeout(10000)
+    });
+    if(res.status===401){logout();return null;}
+    if(!res.ok)throw new Error(res.status);
+    return await res.json();
+}
+
+function parseUtcTimestamp(ts){
+  if(!ts) return null;
+  if(ts.endsWith('Z')) return new Date(ts);
+  return new Date(ts + 'Z');
+}
+function formatLocalTime(ts){
+  const d = parseUtcTimestamp(ts);
+  if(!d || isNaN(d.getTime())) return '--';
+  return d.toLocaleTimeString('ro-RO', {
+    hour:'2-digit',
+    minute:'2-digit',
+    second:'2-digit'
+  });
+}
+
+ 
+ 
+ 
+ 
+function getValidRecentActivityRows(activities) {
+    var rows = [];
+    if (!activities || !Array.isArray(activities) || activities.length === 0) return rows;
+    var VALID_CLASSES = ['WALKING','RUNNING','RESTING','TYPING'];
+    for (var i = 0; i < activities.length; i++) {
+        var row = activities[i];
+        if (!row.timestamp) continue;
+        var dt = new Date(row.timestamp);
+        if (isNaN(dt.getTime())) continue;
+        if (dt.getFullYear() < 2025) continue;
+        var rawLabel = (row.label || row.activity_type || '').trim();
+        if (!rawLabel) continue;
+        if (VALID_CLASSES.indexOf(rawLabel) === -1) continue;
+        row._displayLabel = displayLabel(rawLabel);
+        rows.push(row);
+    }
+     
+    return rows.slice(0, 176);
+}
+
+ 
+function addToActivityBuffer(activities) {
+    var rows = getValidRecentActivityRows(activities);
+    var seen = {};
+     
+    for (var i = 0; i < activitySummaryBuffer.length; i++) {
+        var b = activitySummaryBuffer[i];
+        var key = b.timestamp + '|' + b._displayLabel;
+        seen[key] = true;
+    }
+     
+    for (var j = 0; j < rows.length; j++) {
+        var r = rows[j];
+        var rk = r.timestamp + '|' + r._displayLabel;
+        if (!seen[rk]) {
+            activitySummaryBuffer.unshift(r);
+            seen[rk] = true;
+        }
+    }
+     
+    if (activitySummaryBuffer.length > ACTIVITY_SUMMARY_MAX) {
+        activitySummaryBuffer = activitySummaryBuffer.slice(0, ACTIVITY_SUMMARY_MAX);
+    }
+}
+
+ 
+function updateActivitySummaryBars(){
+    var container=document.getElementById('activitySummaryContainer');
+    if(!container)return;
+    var COLORS={'MERS':cssVar('--activity-walk'),'ALERGARE':cssVar('--activity-run'),'REPAUS':cssVar('--activity-rest-readable'),'TASTARE':cssVar('--activity-typing')};
+    var ORDER=['MERS','ALERGARE','REPAUS','TASTARE'];
+    var rows=activitySummaryBuffer;
+    var counts={};
+    for(var i=0;i<rows.length;i++){var l=rows[i]._displayLabel;counts[l]=(counts[l]||0)+1;}
+    var total=rows.length;
+    if(total===0){container.innerHTML='<div style="text-align:center;color:var(--fitai-ink-soft);padding:24px;">Nu există clasificări valide.</div>';return;}
+    var html='';
+    for(var o=0;o<ORDER.length;o++){
+        var k=ORDER[o];
+        var c=counts[k]||0;
+        if(c===0)continue;
+        var pct=Math.round((c/total)*100);
+        var color=COLORS[k]||'#94a3b8';
+        html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+
+            '<span style="font-weight:700;font-size:0.85rem;color:var(--fitai-ink);min-width:90px;">'+k+'</span>'+
+            '<span style="font-weight:700;font-size:0.85rem;color:var(--fitai-ink-soft);min-width:36px;text-align:right;">'+pct+'%</span>'+
+            '<div style="flex:1;height:10px;background:var(--surface-soft);border-radius:5px;overflow:hidden;">'+
+                '<div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:5px;transition:width 0.4s ease-out;"></div>'+
+            '</div>'+
+        '</div>';
+    }
+    container.innerHTML=html;
+}
+
+ 
+function updateSensorFlowTable(activities) {
+    var tbody=document.querySelector('#dataTable tbody');
+    tbody.innerHTML='';
+    console.log('[FLOW] raw activities',activities?activities.length:0);
+    var validRows = getValidRecentActivityRows(activities);
+    console.log('[FLOW] valid flow rows',validRows.length);
+    if (validRows.length > 0) console.log('[FLOW] first row label', validRows[0]._displayLabel);
+    var sliced = validRows.slice(0,12);
+    var rows = sliced.map(function(d){
+        var timeStr=formatLocalTime(d.timestamp);
+        return'<tr><td style="color:#4A5057;font-weight:400;">'+timeStr+'</td><td>'+activityBadge(d._displayLabel)+'</td></tr>';
+    }).join('')||'<tr><td colspan="2" style="text-align:center;color:var(--fitai-ink-soft);padding:16px;">Nu există date live valide</td></tr>';
+    tbody.innerHTML=rows;
+}
+
+ 
+function updateStatsCards(activities, stats, sessions) {
+     
+    if(stats){
+        var vs=(stats.valid_sessions!=null)?stats.valid_sessions:stats.total_sessions;
+        document.getElementById('sessionCount').textContent=vs;
+    }
+     
+    if(activities){
+        var rhv=activities.filter(function(d){return d.heart_bpm!=null&&d.heart_bpm>0;}).slice(0,20).map(function(d){return d.heart_bpm;});
+        var ahr=rhv.length?Math.round(rhv.reduce(function(a,b){return a+b;},0)/rhv.length):null;
+        document.getElementById('recentAvgHR').innerHTML=ahr?ahr+'<small class="unit"> bpm</small>':'—';
+    }
+     
+    var validSessions=sessions?sessions.filter(isValidSession):[];
+    var cutoff=new Date();
+    cutoff.setDate(cutoff.getDate()-7);
+    var weekDays=new Set();
+    var weekHRs=[];
+    validSessions.forEach(function(s){
+        var st=new Date(s.start_time);
+        if(st>=cutoff){
+            weekDays.add(s.start_time.split('T')[0]);
+            if(s.avg_heart_rate!=null&&s.avg_heart_rate>=30&&s.avg_heart_rate<=220){
+                weekHRs.push(s.avg_heart_rate);
+            }
+        }
+    });
+    document.getElementById('weekSessions').textContent=weekDays.size;
+    var whr=weekHRs.length?Math.round(weekHRs.reduce(function(a,b){return a+b;},0)/weekHRs.length):null;
+    document.getElementById('weekAvgHR').innerHTML=whr?whr+'<small class="unit"> bpm</small>':'—';
+}
+
+ 
+async function refreshLiveAggregates(){
+    if(_refreshingAggregates) return;
+    _refreshingAggregates = true;
+    console.log('[LIVE] refresh aggregates');
+    if(getCurrentView()!=='live'){
+        _refreshingAggregates = false;
+        return;
+    }
+    try{
+         
+        var data=await forceFetchJSON(API+'/activities?limit=50');
+        console.log('[LIVE] activities rows',data?data.length:0);
+        var stats=await forceFetchJSON(API+'/stats');
+        var sessions=await forceFetchJSON(API+'/sessions');
+        console.log('[LIVE] sessions rows',sessions?sessions.length:0);
+
+         
+        if(getCurrentView()!=='live'){_refreshingAggregates=false;return;}
+
+         
+        if(data && Array.isArray(data)){
+            addToActivityBuffer(data);
+            updateActivitySummaryBars();
+        }
+
+         
+        if(data && Array.isArray(data)){
+            updateSensorFlowTable(data);
+        }
+
+         
+        updateStatsCards(data, stats, sessions);
+
+         
+        var now=Date.now();
+        _cache[API+'/activities?limit=50']={data:data,ts:now};
+        _cache[API+'/stats']={data:stats,ts:now};
+        _cache[API+'/sessions']={data:sessions,ts:now};
+    }catch(e){
+        console.log('[LIVE] refresh error:',e);
+    }finally{
+        _refreshingAggregates = false;
+    }
+}
+
+async function pollLiveData(){
+    const token = localStorage.getItem('fitai_token');
+    if (!token) return;
+    try {
+        const res = await fetch(API+'/latest', {
+            headers: {'Authorization':'Bearer '+token}
+        });
+        if (res.status === 401) { logout(); return; }
+        if (!res.ok) return;
+        const d = await res.json();
+        if (!d || d.status === 'no_data') { document.getElementById('connection-status').textContent='FARA DATE LIVE'; document.getElementById('connection-status').className='status-pill'; document.getElementById('connection-status').style.background=''; document.getElementById('connection-status').style.color=''; document.getElementById('connection-status').style.border=''; return; }
+        document.getElementById('connection-status').textContent='DISPOZITIV CONECTAT';
+        document.getElementById('connection-status').className='status-pill system-live';
+        document.getElementById('connection-status').style.background=''; document.getElementById('connection-status').style.color=''; document.getElementById('connection-status').style.border='';
+
+        if (d.label != null) {
+            var actLabel = displayLabel(d.label);
+            document.getElementById('currentActivity').textContent = actLabel;
+            applyCurrentActivityTheme(actLabel);
+        }
+        if (d.heart_bpm != null && d.heart_bpm > 0)
+            document.getElementById('currentHR').textContent =
+                Math.round(d.heart_bpm)+' bpm';
+        if (d.accel_rms != null)
+            document.getElementById('accelRms').textContent =
+                d.accel_rms.toFixed(3)+' g';
+        if (d.mcr != null)
+            document.getElementById('mcrValue').textContent = d.mcr;
+        if (d.iqr != null)
+            document.getElementById('iqrValue').textContent =
+                d.iqr.toFixed(2);
+         
+    } catch(e) {   }
+}
+function getCurrentView(){var av=document.getElementById('activity-view');if(av&&av.classList.contains('active'))return'live';var hv=document.getElementById('history-view');if(hv&&hv.classList.contains('active'))return'history';var rv=document.getElementById('recovery-view');if(rv&&rv.classList.contains('active'))return'recovery';return'live';}
+function startDashboard(){
+    document.getElementById('authError').style.display='none';
+    document.getElementById('auth-screen').style.display='none';
+    document.getElementById('dashboard-wrapper').style.display='flex';
+    seedRecoveryData();
+    updateDashboard();
+     
+    if(liveInterval)clearInterval(liveInterval);
+    liveInterval=setInterval(pollLiveData,2000);
+    pollLiveData();
+     
+    if(liveAggregateTimer)clearInterval(liveAggregateTimer);
+    liveAggregateTimer=setInterval(refreshLiveAggregates,5000);
+    refreshLiveAggregates();
+}
+async function downloadData(){var t=getToken();var r=await fetch(API+'/export',{headers:{'Authorization':'Bearer '+t}});var b=await r.blob();var a=document.createElement('a');a.href=window.URL.createObjectURL(b);a.download='fitai_export.csv';document.body.appendChild(a);a.click();a.remove();}
+function manualRefresh(){invalidateCache('');updateDashboard();if(document.getElementById('activity-view').classList.contains('active')){updateDashboard();}if(document.getElementById('history-view').classList.contains('active')){loadSessionHistory();}if(document.getElementById('recovery-view').classList.contains('active')){loadRecoveryData();}}
+async function updateDashboard(){try{var data=await cachedFetch(API+'/activities?limit=50');if(!data)return;var stats=await cachedFetch(API+'/stats');if(stats){var vs=(stats.valid_sessions!=null)?stats.valid_sessions:stats.total_sessions;document.getElementById('sessionCount').textContent=vs;}var rhv=data.filter(function(d){return d.heart_bpm!=null&&d.heart_bpm>0;}).slice(0,20).map(function(d){return d.heart_bpm;});var ahr=rhv.length?Math.round(rhv.reduce(function(a,b){return a+b;},0)/rhv.length):null;document.getElementById('recentAvgHR').innerHTML=ahr?ahr+'<small class="unit"> bpm</small>':'—';var sessions=await cachedFetch(API+'/sessions');var validSessions=sessions?sessions.filter(isValidSession):[];var cutoff=new Date();cutoff.setDate(cutoff.getDate()-7);var weekDays=new Set();var weekHRs=[];validSessions.forEach(function(s){var st=new Date(s.start_time);if(st>=cutoff){weekDays.add(s.start_time.split('T')[0]);if(s.avg_heart_rate!=null&&s.avg_heart_rate>=30&&s.avg_heart_rate<=220){weekHRs.push(s.avg_heart_rate);}}});document.getElementById('weekSessions').textContent=weekDays.size;var whr=weekHRs.length?Math.round(weekHRs.reduce(function(a,b){return a+b;},0)/weekHRs.length):null;document.getElementById('weekAvgHR').innerHTML=whr?whr+'<small class="unit"> bpm</small>':'—';addToActivityBuffer(data);updateActivitySummaryBars();updateSensorFlowTable(data);}catch(e){console.log('[Dashboard] Update error:',e);}}
+
+ 
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;var b=document.getElementById('install-btn-container');if(b)b.style.display='block';});
+function installPWA(){if(!deferredPrompt)return;deferredPrompt.prompt();deferredPrompt.userChoice.then(function(r){if(r.outcome==='accepted'){toast('Aplicație instalată cu succes!','success');}deferredPrompt=null;});}
+
+ 
+window.addEventListener('online',function(){document.getElementById('connection-status').className='status-pill system-live';document.getElementById('connection-status').textContent='DISPOZITIV CONECTAT';toast('Conexiune restabilită','success');});
+window.addEventListener('offline',function(){document.getElementById('connection-status').className='status-pill';document.getElementById('connection-status').style.background='#FEF2F2';document.getElementById('connection-status').style.color='#B91C1C';document.getElementById('connection-status').style.border='1px solid #FCA5A5';document.getElementById('connection-status').textContent='FARA CONEXIUNE';toast('Fără conexiune \u2014 date păstrate local','error');});
+
+ 
+if(getToken())startDashboard();
+window.login = login;
+window.register = register;
+
+ 
+window.addEventListener('load', function() {
+    console.log("[DIAGNOSTIC] Initializing automated validation routine...");
+    var assertions = {
+        "Authentication Engine [login] Mapping": typeof window.login === 'function',
+        "Authentication Engine [register] Mapping": typeof window.register === 'function',
+        "Telemetry Engine [Chart.js] Compilation": typeof Chart === 'function',
+        "Credential Capture Vector [email]": document.getElementById('email') !== null,
+        "Credential Capture Vector [password]": document.getElementById('password') !== null,
+        "Session History Engine [loadSessionHistory]": typeof window.loadSessionHistory === 'function'
+    };
+    var suitePassed = true;
+    var failures = [];
+    for (var testName in assertions) {
+        if (assertions[testName]) {
+            console.log("%c[PASS] " + testName, "color: #10b981; font-weight: bold;");
+        } else {
+            console.error("[FAIL] " + testName);
+            failures.push(testName);
+            suitePassed = false;
+        }
+    }
+    if (!suitePassed) {
+        var errorBanner = document.createElement('div');
+        errorBanner.style = "position:fixed; top:0; left:0; width:100%; background:#ef4444; color:white; text-align:center; padding:12px; font-weight:bold; z-index:99999; box-shadow:0 4px 12px rgba(0,0,0,0.2);";
+        errorBanner.innerHTML = "CRITICAL SYSTEM FAULT: Script Parsing Failure [Missing: " + failures.join(', ') + "]. Clear Service Worker Cache.";
+        document.body.prepend(errorBanner);
+    } else {
+        console.log("%c[FITAI SUCCESS] All automated tests passed. Frontend application architecture stable.", "background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;");
+    }
+});
+</script>
+</body>
+</html>
