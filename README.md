@@ -4,6 +4,10 @@ An end-to-end wearable activity-recognition prototype developed by Andrei Stefan
 
 FitAI connects an ESP32-C3 wearable to a FastAPI backend and browser dashboard. It classifies **resting, walking, running, and typing** from motion signals and provides an illustrative recovery-readiness score.
 
+**Bachelor thesis grade: 9/10.** Individually developed across hardware, firmware, data collection, machine learning, backend and frontend.
+
+[Explore the full system design](docs/SYSTEM.md) · [Trained model and evaluation](docs/MODEL.md) · [Hardware diagnostics](diagnostics/README.md)
+
 ## Features
 
 - Arduino C++ firmware: 100 Hz motion acquisition, one-second analysis windows, six extracted features, Wi-Fi telemetry and temporary offline buffering.
@@ -44,7 +48,7 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 
 Open `http://127.0.0.1:8000` for the dashboard and `/docs` for the API. Register a local account. The database is created on startup and excluded from Git.
 
-The serialized model and raw personal measurements are not distributed in this source-only release. Until you train a local model, the application uses motion heuristics. `scripts/retrain_from_collected.py` supports retraining from a locally collected database.
+The original trained Random Forest model is included in `app/ai/activity_model.joblib`, so local inference can use the thesis classifier without retraining. Raw personal measurements and the original database are excluded. `scripts/retrain_from_collected.py` supports retraining from a separately collected local database. See [model review and compatibility](docs/MODEL.md).
 
 ## Wearable
 
@@ -74,6 +78,8 @@ python -m pytest -q
 | `scripts/` | Local model retraining |
 | `tests/` | Existing backend tests |
 | `alembic/` | Historical schema migration scaffolding |
+| `diagnostics/` | Original standalone I2C and OLED validation sketches |
+| `docs/` | System architecture, hardware connections and model review |
 
 ## Scope and privacy
 
