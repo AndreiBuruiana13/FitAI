@@ -1,0 +1,40 @@
+{
+  "timestamp": "2026-06-06T00:45:27.966249+00:00",
+  "feature_list": [
+    "accel_rms",
+    "accel_variance",
+    "accel_magnitude_mean",
+    "gyro_rms",
+    "mcr",
+    "iqr"
+  ],
+  "class_list": [
+    "RESTING",
+    "RUNNING",
+    "TYPING",
+    "WALKING"
+  ],
+  "sample_counts": {
+    "RESTING": 1634,
+    "RUNNING": 849,
+    "TYPING": 1118,
+    "WALKING": 1840
+  },
+  "total_samples": 5441,
+  "cv_macro_f1_5fold": 0.9071,
+  "holdout_accuracy": 0.9017,
+  "holdout_macro_f1": 0.8954,
+  "per_class_f1": {
+    "RESTING": 0.9157,
+    "RUNNING": 0.8848,
+    "TYPING": 0.8584,
+    "WALKING": 0.9224
+  },
+  "model_type": "RandomForestClassifier",
+  "hyperparameters": {
+    "n_estimators": 100,
+    "random_state": 42,
+    "class_weight": "balanced",
+    "n_jobs": -1
+  }
+}
